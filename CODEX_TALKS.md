@@ -1,29 +1,45 @@
 # Codex Talks Log
 
-## 2025-02-14
+## 2026-01-16
 - User asked to start the project step by step and first create a minimal backend implementation.
 - Agreed to implement a minimal Go D-Bus service (`net.dgkim.SendToLinux`) with `GetStatus`, `GetRecentItems`, and an optional test signal controlled by `STL_EMIT_TEST=1`.
 
-## 2025-02-14 (cont.)
+## 2026-01-16 (cont.)
 - User requested `.gitignore` and `backend/README.md`.
 - Added Go-appropriate ignore rules and a backend README with run instructions and next steps.
 
-## 2025-02-14 (cont. 2)
+## 2026-01-16 (cont. 2)
 - User requested moving `go.mod` into `backend/` since the project uses both Go and GJS.
 - Moved `go.mod` from repo root to `backend/go.mod`.
 
-## 2025-02-14 (cont. 3)
+## 2026-01-16 (cont. 3)
 - User requested updating `backend/README.md` to note the Go module location.
 - Added a module layout section with guidance on running commands from `backend/`.
 
-## 2025-02-14 (cont. 4)
+## 2026-01-16 (cont. 4)
 - User requested implementing the backend HTTP server.
 - Added GET `/` and POST `/text`, saving text to `~/Downloads/SendToLinux`, emitting `ItemReceived`, and wiring status/recent items.
 
-## 2025-02-14 (cont. 5)
+## 2026-01-16 (cont. 5)
 - User requested modularizing the backend: HTTP handlers and D-Bus service moved into `backend/internal/`.
 - Added `internal/dbussvc` for D-Bus logic and `internal/httpserver` for HTTP server and handlers.
 
-## 2025-02-14 (cont. 6)
+## 2026-01-16 (cont. 6)
 - User requested documentation updates to reflect current backend modularization and HTTP support.
 - Updated `backend/README.md` and `docs/DEV.md` to reflect module layout and `/text` endpoint.
+
+## 2026-01-16 (cont. 7)
+- User requested step 3: GNOME extension D-Bus subscribe + notification on ItemReceived.
+- Added minimal extension in `extension/` with metadata and D-Bus signal subscription that triggers GNOME notifications.
+
+## 2026-01-16 (cont. 8)
+- User requested `extension/README.md` and a build/install script.
+- Added extension README and `extension/install.sh` for local install.
+
+## 2026-01-16 (cont. 9)
+- User requested an uninstall script for the extension.
+- Added `extension/uninstall.sh` to remove the installed extension directory.
+
+## 2026-01-16 (cont. 10)
+- User requested a task bar icon and a command to open the received folder.
+- Added a GNOME panel button with a menu item to open Downloads/SendToLinux.

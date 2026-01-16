@@ -1,0 +1,10 @@
+{
+  "uuid": "send-to-linux@dgkim",
+  "name": "Send to Linux",
+  "description": "Receive text/files over LAN and surface them in GNOME.",
+  "shell-version": [
+    "45",
+    "46"
+  ],
+  "version": 1
+}
