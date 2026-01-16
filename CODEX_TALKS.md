@@ -64,3 +64,15 @@
 ## 2026-01-16 (cont. 15)
 - User requested Flatpak README and build/install/uninstall scripts.
 - Added `backend/flatpak/README.md` plus `build.sh`, `install.sh`, and `uninstall.sh`.
+
+## 2026-01-16 (cont. 16)
+- User requested updating `docs/TODO.md` to reflect progress.
+- Marked completed backend HTTP/D-Bus items and extension notification/icon/open-folder tasks; added Flatpak publish workflow to Post-MVP.
+
+## 2026-01-16 (cont. 17)
+- User requested moving hard-coded HTML into template and CSS files.
+- Added HTML/CSS assets under `backend/internal/httpserver/assets` and updated the HTTP server to serve them.
+
+## 2026-01-16 (cont. 18)
+- User requested HTML response page for POST results with a success message.
+- Updated template to render a notice and serve it after `/text` saves successfully.

@@ -2,6 +2,7 @@ package httpserver
 
 import (
 	"fmt"
+	"html/template"
 	"io"
 	"log"
 	"net"
@@ -16,7 +17,13 @@ import (
 )
 
 type Server struct {
-	svc *dbussvc.Service
+	svc      *dbussvc.Service
+	template *template.Template
+	assetDir string
+}
+
+type pageData struct {
+	Message string
 }
 
 func Start(svc *dbussvc.Service) (*http.Server, error) {
@@ -34,10 +41,17 @@ func Start(svc *dbussvc.Service) (*http.Server, error) {
 	url := fmt.Sprintf("http://%s:%d/", host, actualPort)
 	svc.SetStatus(url, uint32(actualPort), true)
 
-	h := &Server{svc: svc}
+	assetDir := getenvDefault("STL_ASSET_DIR", filepath.Join("internal", "httpserver", "assets"))
+	tmpl, err := template.ParseFiles(filepath.Join(assetDir, "index.html"))
+	if err != nil {
+		return nil, err
+	}
+
+	h := &Server{svc: svc, template: tmpl, assetDir: assetDir}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", h.handleIndex)
 	mux.HandleFunc("/text", h.handleText)
+	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir(filepath.Join(assetDir, "static")))))
 
 	server := &http.Server{
 		Handler: mux,
@@ -61,17 +75,9 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	fmt.Fprint(w, `<!doctype html>
-<html>
-<head><meta charset="utf-8"><title>Send to Linux</title></head>
-<body>
-  <h1>Send to Linux</h1>
-  <form action="/text" method="post">
-    <textarea name="text" rows="12" cols="60" placeholder="Paste text"></textarea><br>
-    <button type="submit">Send</button>
-  </form>
-</body>
-</html>`)
+	if err := s.template.Execute(w, pageData{}); err != nil {
+		http.Error(w, "template error", http.StatusInternalServerError)
+	}
 }
 
 func (s *Server) handleText(w http.ResponseWriter, r *http.Request) {
@@ -124,8 +130,10 @@ func (s *Server) handleText(w http.ResponseWriter, r *http.Request) {
 	s.svc.AddRecent(item)
 	s.svc.EmitItemReceived(item)
 
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	fmt.Fprintln(w, "OK")
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	if err := s.template.Execute(w, pageData{Message: "Text sent successfully."}); err != nil {
+		http.Error(w, "template error", http.StatusInternalServerError)
+	}
 }
 
 func resolveSaveDir() (string, error) {

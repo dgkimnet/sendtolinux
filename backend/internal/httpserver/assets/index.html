@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Send to Linux</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main class="page">
+    <header class="header">
+      <h1>Send to Linux</h1>
+      <p>Paste text below to send it to your desktop.</p>
+    </header>
+    {{if .Message}}
+    <div class="notice">{{.Message}}</div>
+    {{end}}
+    <form class="card" action="/text" method="post">
+      <label class="label" for="text">Text</label>
+      <textarea id="text" name="text" rows="12" placeholder="Paste text"></textarea>
+      <button type="submit">Send</button>
+    </form>
+  </main>
+</body>
+</html>
