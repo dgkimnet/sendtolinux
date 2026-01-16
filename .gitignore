@@ -12,7 +12,8 @@
 /go.work.sum
 
 # Go module cache
-/vendor/
+vendor/
+backend/vendor/
 
 # macOS
 .DS_Store
@@ -20,3 +21,12 @@
 # Editor/IDE
 .vscode/
 .idea/
+
+# Flatpak build output
+.flatpak-builder/
+backend/build-dir/
+backend/.flatpak-builder/
+backend/flatpak/.flatpak-builder/
+backend/flatpak/build-dir/
+backend/flatpak/send-to-linux-backend.flatpak
+backend/flatpak/repo/

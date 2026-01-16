@@ -39,6 +39,16 @@ export default class SendToLinuxExtension {
         openItem.connect('activate', () => this._openReceivedFolder());
         this._panelButton.menu.addMenuItem(openItem);
 
+        this._panelButton.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+
+        const startItem = new PopupMenu.PopupMenuItem('Start Backend');
+        startItem.connect('activate', () => this._startBackend());
+        this._panelButton.menu.addMenuItem(startItem);
+
+        const stopItem = new PopupMenu.PopupMenuItem('Stop Backend');
+        stopItem.connect('activate', () => this._stopBackend());
+        this._panelButton.menu.addMenuItem(stopItem);
+
         Main.panel.addToStatusArea('send-to-linux', this._panelButton);
     }
 
@@ -70,5 +80,28 @@ export default class SendToLinuxExtension {
         const folder = GLib.build_filenamev([downloads, 'SendToLinux']);
         const file = Gio.File.new_for_path(folder);
         Gio.AppInfo.launch_default_for_uri(file.get_uri(), null);
+    }
+
+    _startBackend() {
+        this._runFlatpak(['flatpak', 'run', 'net.dgkim.SendToLinux.Backend']);
+    }
+
+    _stopBackend() {
+        this._runFlatpak(['flatpak', 'kill', 'net.dgkim.SendToLinux.Backend']);
+    }
+
+    _runFlatpak(argv) {
+        try {
+            const proc = Gio.Subprocess.new(argv, Gio.SubprocessFlags.NONE);
+            proc.wait_check_async(null, (subprocess, res) => {
+                try {
+                    subprocess.wait_check_finish(res);
+                } catch (err) {
+                    Main.notify('Send to Linux', `Command failed: ${err.message}`);
+                }
+            });
+        } catch (err) {
+            Main.notify('Send to Linux', `Command failed: ${err.message}`);
+        }
     }
 }

@@ -1,0 +1,34 @@
+{
+  "app-id": "net.dgkim.SendToLinux.Backend",
+  "runtime": "org.freedesktop.Platform",
+  "runtime-version": "23.08",
+  "sdk": "org.freedesktop.Sdk",
+  "sdk-extensions": [
+    "org.freedesktop.Sdk.Extension.golang"
+  ],
+  "command": "send-to-linux-backend",
+  "build-options": {
+    "append-path": "/usr/lib/sdk/golang/bin"
+  },
+  "finish-args": [
+    "--share=network",
+    "--socket=session-bus",
+    "--own-name=net.dgkim.SendToLinux",
+    "--filesystem=xdg-download"
+  ],
+  "modules": [
+    {
+      "name": "sendtolinux-backend",
+      "buildsystem": "simple",
+      "build-commands": [
+        "go build -mod=vendor -o /app/bin/send-to-linux-backend ."
+      ],
+      "sources": [
+        {
+          "type": "dir",
+          "path": ".."
+        }
+      ]
+    }
+  ]
+}

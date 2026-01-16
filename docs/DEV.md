@@ -17,6 +17,12 @@
   - implement GetStatus / GetRecentItems (in-memory)
   - emit ItemReceived on `/text` upload
 
+Flatpak packaging:
+- Manifest: `backend/flatpak/net.dgkim.SendToLinux.Backend.json`
+- Build/install: `flatpak-builder --install --user build-dir backend/flatpak/net.dgkim.SendToLinux.Backend.json`
+- Requires: `org.freedesktop.Sdk.Extension.golang` for Go toolchain inside Flatpak SDK
+- Vendored deps for offline builds: run `go -C backend mod vendor` before building
+
 Recommended env vars:
 - `STL_BIND=0.0.0.0`
 - `STL_PORT=8000` (or 0 for random)

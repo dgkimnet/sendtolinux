@@ -7,6 +7,7 @@ The extension listens for D-Bus signals from the backend and shows GNOME notific
 - `metadata.json` extension metadata and UUID
 - `extension.js` D-Bus signal subscription and notifications
 - `install.sh` helper to install the extension into the user profile
+- `uninstall.sh` helper to remove the extension from the user profile
 
 ## Build
 No build step is required for this simple JavaScript extension.
@@ -24,6 +25,9 @@ Then run:
 ```bash
 gnome-extensions enable send-to-linux@dgkim
 ```
+
+## Backend Control
+Use the panel menu to start or stop the backend Flatpak (`net.dgkim.SendToLinux.Backend`).
 
 ## Remove
 ```bash

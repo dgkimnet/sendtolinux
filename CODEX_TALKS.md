@@ -43,3 +43,24 @@
 ## 2026-01-16 (cont. 10)
 - User requested a task bar icon and a command to open the received folder.
 - Added a GNOME panel button with a menu item to open Downloads/SendToLinux.
+
+## 2026-01-16 (cont. 11)
+- User requested Flatpak-packaged backend and extension start/stop controls.
+- Added Flatpak manifest at `backend/flatpak/net.dgkim.SendToLinux.Backend.json` and extension menu actions to run/kill the Flatpak.
+- Updated backend and extension docs plus `docs/DEV.md` with packaging notes.
+
+## 2026-01-16 (cont. 12)
+- User reported Flatpak build failed with `go` not found.
+- Updated Flatpak manifest to use the Go SDK extension and appended PATH; noted requirement in `docs/DEV.md`.
+
+## 2026-01-16 (cont. 13)
+- User hit Flatpak build failure due to Go module download blocked.
+- Vendored Go dependencies and updated Flatpak build to use `-mod=vendor`; documented in `docs/DEV.md` and `backend/README.md`.
+
+## 2026-01-16 (cont. 14)
+- User requested ignoring Flatpak build artifacts and the vendored dependencies.
+- Updated `.gitignore` to exclude Flatpak build directories and `backend/vendor/`.
+
+## 2026-01-16 (cont. 15)
+- User requested Flatpak README and build/install/uninstall scripts.
+- Added `backend/flatpak/README.md` plus `build.sh`, `install.sh`, and `uninstall.sh`.
