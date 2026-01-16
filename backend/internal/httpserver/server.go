@@ -1,9 +1,11 @@
 package httpserver
 
 import (
+	"embed"
 	"fmt"
 	"html/template"
 	"io"
+	"io/fs"
 	"log"
 	"net"
 	"net/http"
@@ -20,6 +22,7 @@ type Server struct {
 	svc      *dbussvc.Service
 	template *template.Template
 	assetDir string
+	assetFS  fs.FS
 }
 
 type pageData struct {
@@ -41,17 +44,17 @@ func Start(svc *dbussvc.Service) (*http.Server, error) {
 	url := fmt.Sprintf("http://%s:%d/", host, actualPort)
 	svc.SetStatus(url, uint32(actualPort), true)
 
-	assetDir := getenvDefault("STL_ASSET_DIR", filepath.Join("internal", "httpserver", "assets"))
-	tmpl, err := template.ParseFiles(filepath.Join(assetDir, "index.html"))
+	assetDir := os.Getenv("STL_ASSET_DIR")
+	tmpl, assetFS, err := loadTemplateAndFS(assetDir)
 	if err != nil {
 		return nil, err
 	}
 
-	h := &Server{svc: svc, template: tmpl, assetDir: assetDir}
+	h := &Server{svc: svc, template: tmpl, assetDir: assetDir, assetFS: assetFS}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", h.handleIndex)
 	mux.HandleFunc("/text", h.handleText)
-	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir(filepath.Join(assetDir, "static")))))
+	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(assetFS))))
 
 	server := &http.Server{
 		Handler: mux,
@@ -184,4 +187,28 @@ func hostnameOrLocal() string {
 		return "localhost"
 	}
 	return host
+}
+
+//go:embed assets/index.html assets/static/*
+var embeddedAssets embed.FS
+
+func loadTemplateAndFS(assetDir string) (*template.Template, fs.FS, error) {
+	if assetDir == "" {
+		tmpl, err := template.ParseFS(embeddedAssets, "assets/index.html")
+		if err != nil {
+			return nil, nil, err
+		}
+		staticFS, err := fs.Sub(embeddedAssets, "assets/static")
+		if err != nil {
+			return nil, nil, err
+		}
+		return tmpl, staticFS, nil
+	}
+
+	tmpl, err := template.ParseFiles(filepath.Join(assetDir, "index.html"))
+	if err != nil {
+		return nil, nil, err
+	}
+	staticDir := filepath.Join(assetDir, "static")
+	return tmpl, os.DirFS(staticDir), nil
 }

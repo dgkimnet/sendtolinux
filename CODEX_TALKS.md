@@ -76,3 +76,27 @@
 ## 2026-01-16 (cont. 18)
 - User requested HTML response page for POST results with a success message.
 - Updated template to render a notice and serve it after `/text` saves successfully.
+
+## 2026-01-16 (cont. 19)
+- User requested notification actions for copy-to-clipboard and open received folder.
+- Added MessageTray notifications with Copy (text only) and Open Folder actions.
+
+## 2026-01-16 (cont. 20)
+- User reported `MessageTray.SystemNotificationSource` not a constructor.
+- Switched to `MessageTray.Source` for GNOME 45 compatibility.
+
+## 2026-01-16 (cont. 21)
+- User reported MessageTray.Source constructor expects a properties object.
+- Updated to pass `{ title, iconName }`.
+
+## 2026-01-16 (cont. 22)
+- User reported Flatpak runtime missing HTML assets.
+- Embedded HTTP assets with Go embed, with optional STL_ASSET_DIR override for local dev.
+
+## 2026-01-16 (cont. 23)
+- User reported MessageTray notification error; constructor signature mismatch.
+- Updated notification construction to use the properties object form.
+
+## 2026-01-16 (cont. 24)
+- User reported error on notification source notify call.
+- Switched to `showNotification`, added NotificationPolicy and source lifecycle handling.

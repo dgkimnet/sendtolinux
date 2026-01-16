@@ -2,6 +2,7 @@ import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import St from 'gi://St';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import * as MessageTray from 'resource:///org/gnome/shell/ui/messageTray.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
@@ -14,6 +15,7 @@ export default class SendToLinuxExtension {
     constructor() {
         this._signalId = null;
         this._panelButton = null;
+        this._notificationSource = null;
     }
 
     enable() {
@@ -27,6 +29,8 @@ export default class SendToLinuxExtension {
             Gio.DBusSignalFlags.NONE,
             this._onItemReceived.bind(this)
         );
+
+        this._ensureNotificationSource();
 
         this._panelButton = new PanelMenu.Button(0.0, 'Send to Linux');
         const icon = new St.Icon({
@@ -58,6 +62,11 @@ export default class SendToLinuxExtension {
             this._signalId = null;
         }
 
+        if (this._notificationSource) {
+            this._notificationSource.destroy();
+            this._notificationSource = null;
+        }
+
         if (this._panelButton) {
             this._panelButton.destroy();
             this._panelButton = null;
@@ -71,7 +80,38 @@ export default class SendToLinuxExtension {
             ? value
             : `${value} (${size} bytes)`;
 
-        Main.notify(title, body);
+        this._ensureNotificationSource();
+        const notification = new MessageTray.Notification({
+            source: this._notificationSource,
+            title,
+            body,
+            urgency: MessageTray.Urgency.CRITICAL, // this make sure notification pops up
+        });
+
+        if (type === 'text') {
+            notification.addAction('Copy', () => this._copyToClipboard(value));
+        }
+
+        notification.addAction('Open Folder', () => this._openReceivedFolder());
+        this._notificationSource.addNotification(notification);
+    }
+
+    _ensureNotificationSource() {
+        if (this._notificationSource) {
+            return;
+        }
+        this._notificationSource = new MessageTray.Source({
+            title: 'Send to Linux',
+            iconName: 'send-to-symbolic',
+        });
+        this._notificationSource.connect('destroy', () => {
+            this._notificationSource = null;
+        });
+        Main.messageTray.add(this._notificationSource);
+    }
+
+    _copyToClipboard(text) {
+        St.Clipboard.get_default().set_text(St.ClipboardType.CLIPBOARD, text);
     }
 
     _openReceivedFolder() {
