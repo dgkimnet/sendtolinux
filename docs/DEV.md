@@ -11,11 +11,11 @@
 - `docs/` design docs
 
 ## Backend dev
-- `go run ./backend` should:
+- `go -C backend run .` should:
   - start HTTP server on a port (configurable)
   - register D-Bus name `net.dgkim.SendToLinux`
-  - implement GetStatus / GetRecentItems
-  - emit ItemReceived on upload
+  - implement GetStatus / GetRecentItems (in-memory)
+  - emit ItemReceived on `/text` upload
 
 Recommended env vars:
 - `STL_BIND=0.0.0.0`
@@ -51,4 +51,3 @@ Logs:
 - [ ] extension: subscribes signals, notifies
 - [ ] extension: copy-to-clipboard action works
 - [ ] extension: shows QR for URL
-

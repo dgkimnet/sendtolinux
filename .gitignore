@@ -1,0 +1,22 @@
+# Go build artifacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Go workspace
+/go.work
+/go.work.sum
+
+# Go module cache
+/vendor/
+
+# macOS
+.DS_Store
+
+# Editor/IDE
+.vscode/
+.idea/
