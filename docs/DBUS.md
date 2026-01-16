@@ -1,0 +1,49 @@
+# D-Bus Interface Spec
+
+## Bus
+- Session bus
+
+## Name / Path / Interface
+- Service name: `net.dgkim.SendToLinux`
+- Object path:  `/net/dgkim/SendToLinux`
+- Interface:    `net.dgkim.SendToLinux`
+
+## Methods
+
+### GetStatus()
+Returns current server status.
+
+**Signature**
+- `GetStatus() -> (s url, u port, b running)`
+
+Notes:
+- `url` is the full URL usable from LAN, e.g. `http://yoga-7.local:8000/`
+- `running` indicates whether HTTP server is listening
+
+### GetRecentItems(u limit)
+Returns recent received items (most recent first).
+
+**Signature**
+- `GetRecentItems(u limit) -> a(sssu) items`
+
+Each item tuple:
+- `id`    (string) unique ID (timestamp-based or ULID)
+- `type`  (string) `"text"` or `"file"`
+- `value` (string) text preview (short) OR absolute file path
+- `size`  (uint32) bytes (file size) or text length
+
+## Signals
+
+### ItemReceived(s id, s type, s value, u size)
+Emitted when an item is received and persisted.
+
+- For `type="text"`:
+  - `value` is full text (MVP) or preview (recommended). If full text can be large, prefer preview and store full in file.
+- For `type="file"`:
+  - `value` is absolute path to saved file
+
+Recommended: keep signal payload small (preview + path). Full text can be retrieved via file open.
+
+## Introspection XML (MVP)
+(Provide later as `docs/net.dgkim.SendToLinux.xml` once implementing.)
+
