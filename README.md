@@ -1,5 +1,7 @@
 # Send to Linux (GNOME Extension + Go backend)
 
+![Extension popover](screenshots/extension.png)
+
 Receive text/files from iOS (or any device on same Wi-Fi) via a local web server, and surface them in GNOME:
 - GNOME top bar extension (tray icon + popover)
 - Local web server for upload (text + files)
@@ -37,6 +39,16 @@ See:
 - `docs/DBUS.md`
 - `docs/DEV.md`
 - `docs/TODO.md`
+
+## Screenshots
+
+![Extension popover](screenshots/extension.png)
+
+![Mobile upload page](screenshots/mobile.png)
+
+![Text received notification](screenshots/text_received.png)
+
+![File received notification](screenshots/file_received.png)
 
 ## Non-goals (for MVP)
 - Auth tokens / user accounts
