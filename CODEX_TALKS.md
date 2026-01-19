@@ -100,3 +100,12 @@
 ## 2026-01-16 (cont. 24)
 - User reported error on notification source notify call.
 - Switched to `showNotification`, added NotificationPolicy and source lifecycle handling.
+
+## 2026-01-19
+- User requested backend-generated QR PNG and extension popover display.
+- Added backend QR generation via `qrencode`, exposed `GetQrPath`, and wired the extension popover to show the QR and URL.
+- Updated D-Bus and dev docs for the new QR path method and dependency.
+
+## 2026-01-19 (cont.)
+- User requested URL hostnames include `.local`.
+- Updated backend hostname resolution to append `.local` when needed.

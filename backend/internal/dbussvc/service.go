@@ -24,6 +24,7 @@ type statusState struct {
 	url     string
 	port    uint32
 	running bool
+	qrPath  string
 }
 
 type Service struct {
@@ -44,6 +45,12 @@ func (s *Service) GetStatus() (string, uint32, bool, *dbus.Error) {
 	s.statusMu.RLock()
 	defer s.statusMu.RUnlock()
 	return s.status.url, s.status.port, s.status.running, nil
+}
+
+func (s *Service) GetQrPath() (string, *dbus.Error) {
+	s.statusMu.RLock()
+	defer s.statusMu.RUnlock()
+	return s.status.qrPath, nil
 }
 
 func (s *Service) GetRecentItems(limit uint32) ([]RecentItem, *dbus.Error) {
@@ -84,5 +91,13 @@ func (s *Service) AddRecent(item RecentItem) {
 func (s *Service) SetStatus(url string, port uint32, running bool) {
 	s.statusMu.Lock()
 	defer s.statusMu.Unlock()
-	s.status = statusState{url: url, port: port, running: running}
+	s.status.url = url
+	s.status.port = port
+	s.status.running = running
+}
+
+func (s *Service) SetQrPath(path string) {
+	s.statusMu.Lock()
+	defer s.statusMu.Unlock()
+	s.status.qrPath = path
 }

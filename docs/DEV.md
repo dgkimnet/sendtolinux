@@ -4,6 +4,7 @@
 - GNOME Shell (GNOME 45+ recommended)
 - Go 1.22+
 - `gnome-extensions` CLI (optional but helpful)
+- `qrencode` (backend QR PNG generation)
 
 ## Repo layout
 - `backend/` Go code

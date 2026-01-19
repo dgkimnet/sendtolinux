@@ -22,3 +22,4 @@ Remove the app:
 - App ID: `net.dgkim.SendToLinux.Backend`
 - Manifest: `backend/flatpak/net.dgkim.SendToLinux.Backend.json`
 - Requires the Go SDK extension: `org.freedesktop.Sdk.Extension.golang//23.08`
+- Builds `qrencode` from source so the backend can generate QR PNGs inside the sandbox.

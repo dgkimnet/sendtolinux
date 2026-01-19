@@ -10,6 +10,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -43,6 +44,11 @@ func Start(svc *dbussvc.Service) (*http.Server, error) {
 	host := hostnameOrLocal()
 	url := fmt.Sprintf("http://%s:%d/", host, actualPort)
 	svc.SetStatus(url, uint32(actualPort), true)
+	if qrPath, err := generateQrPng(url); err != nil {
+		log.Printf("qr png: %v", err)
+	} else {
+		svc.SetQrPath(qrPath)
+	}
 
 	assetDir := os.Getenv("STL_ASSET_DIR")
 	tmpl, assetFS, err := loadTemplateAndFS(assetDir)
@@ -65,6 +71,7 @@ func Start(svc *dbussvc.Service) (*http.Server, error) {
 			log.Printf("http server error: %v", err)
 		}
 		svc.SetStatus(url, uint32(actualPort), false)
+		svc.SetQrPath("")
 	}()
 
 	log.Printf("HTTP server listening on %s", addr)
@@ -186,7 +193,32 @@ func hostnameOrLocal() string {
 	if err != nil || host == "" {
 		return "localhost"
 	}
-	return host
+	if strings.Contains(host, ".") {
+		return host
+	}
+	return host + ".local"
+}
+
+func generateQrPng(url string) (string, error) {
+	cacheDir, err := os.UserCacheDir()
+	if err != nil || cacheDir == "" {
+		cacheDir = os.TempDir()
+	}
+	dir := filepath.Join(cacheDir, "SendToLinux")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return "", err
+	}
+	path := filepath.Join(dir, "qr.png")
+	cmd := exec.Command("qrencode", "-o", path, "-s", "6", "-m", "1", url)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		message := strings.TrimSpace(string(output))
+		if message != "" {
+			return "", fmt.Errorf("qrencode failed: %w: %s", err, message)
+		}
+		return "", fmt.Errorf("qrencode failed: %w", err)
+	}
+	return path, nil
 }
 
 //go:embed assets/index.html assets/static/*

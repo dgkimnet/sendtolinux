@@ -16,6 +16,10 @@ export default class SendToLinuxExtension {
         this._signalId = null;
         this._panelButton = null;
         this._notificationSource = null;
+        this._menuOpenId = null;
+        this._qrImage = null;
+        this._urlLabel = null;
+        this._statusLabel = null;
     }
 
     enable() {
@@ -39,6 +43,29 @@ export default class SendToLinuxExtension {
         });
         this._panelButton.add_child(icon);
 
+        const qrItem = new PopupMenu.PopupBaseMenuItem({
+            reactive: false,
+            can_focus: false,
+        });
+        const qrBox = new St.BoxLayout({
+            vertical: true,
+            x_expand: true,
+            y_expand: true,
+        });
+        this._statusLabel = new St.Label({ text: 'Loading status…' });
+        this._urlLabel = new St.Label({ text: '' });
+        this._qrImage = new St.Icon({
+            icon_size: 160,
+            visible: false,
+        });
+        qrBox.add_child(this._statusLabel);
+        qrBox.add_child(this._urlLabel);
+        qrBox.add_child(this._qrImage);
+        qrItem.add_child(qrBox);
+        this._panelButton.menu.addMenuItem(qrItem);
+
+        this._panelButton.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+
         const openItem = new PopupMenu.PopupMenuItem('Open Received Folder');
         openItem.connect('activate', () => this._openReceivedFolder());
         this._panelButton.menu.addMenuItem(openItem);
@@ -54,6 +81,12 @@ export default class SendToLinuxExtension {
         this._panelButton.menu.addMenuItem(stopItem);
 
         Main.panel.addToStatusArea('send-to-linux', this._panelButton);
+
+        this._menuOpenId = this._panelButton.menu.connect('open-state-changed', (_menu, isOpen) => {
+            if (isOpen) {
+                this._refreshStatus();
+            }
+        });
     }
 
     disable() {
@@ -68,6 +101,10 @@ export default class SendToLinuxExtension {
         }
 
         if (this._panelButton) {
+            if (this._menuOpenId !== null) {
+                this._panelButton.menu.disconnect(this._menuOpenId);
+                this._menuOpenId = null;
+            }
             this._panelButton.destroy();
             this._panelButton = null;
         }
@@ -108,6 +145,75 @@ export default class SendToLinuxExtension {
             this._notificationSource = null;
         });
         Main.messageTray.add(this._notificationSource);
+    }
+
+    _refreshStatus() {
+        if (!this._statusLabel || !this._urlLabel || !this._qrImage) {
+            return;
+        }
+
+        this._statusLabel.text = 'Checking backend…';
+        this._urlLabel.text = '';
+        this._qrImage.visible = false;
+        this._qrImage.gicon = null;
+
+        Gio.DBus.session.call(
+            SERVICE_NAME,
+            OBJECT_PATH,
+            INTERFACE_NAME,
+            'GetStatus',
+            null,
+            null,
+            Gio.DBusCallFlags.NONE,
+            -1,
+            null,
+            (connection, result) => {
+                try {
+                    const reply = connection.call_finish(result);
+                    const [url, _port, running] = reply.deepUnpack();
+                    if (!running || !url) {
+                        this._statusLabel.text = 'Backend offline';
+                        return;
+                    }
+                    this._statusLabel.text = 'Scan to upload';
+                    this._urlLabel.text = url;
+                    this._loadQrPath();
+                } catch (err) {
+                    this._statusLabel.text = 'Backend offline';
+                }
+            }
+        );
+    }
+
+    _loadQrPath() {
+        Gio.DBus.session.call(
+            SERVICE_NAME,
+            OBJECT_PATH,
+            INTERFACE_NAME,
+            'GetQrPath',
+            null,
+            null,
+            Gio.DBusCallFlags.NONE,
+            -1,
+            null,
+            (connection, result) => {
+                try {
+                    const reply = connection.call_finish(result);
+                    const [path] = reply.deepUnpack();
+                    if (!path) {
+                        this._statusLabel.text = 'QR unavailable';
+                        this._qrImage.visible = false;
+                        this._qrImage.gicon = null;
+                        return;
+                    }
+                    const file = Gio.File.new_for_path(path);
+                    this._qrImage.gicon = new Gio.FileIcon({ file });
+                    this._qrImage.visible = true;
+                } catch (err) {
+                    this._statusLabel.text = 'QR unavailable';
+                }
+            }
+        );
     }
 
     _copyToClipboard(text) {

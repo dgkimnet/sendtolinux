@@ -18,6 +18,17 @@
   ],
   "modules": [
     {
+      "name": "qrencode",
+      "buildsystem": "autotools",
+      "sources": [
+        {
+          "type": "git",
+          "url": "https://github.com/fukuchi/libqrencode.git",
+          "tag": "v4.1.1"
+        }
+      ]
+    },
+    {
       "name": "sendtolinux-backend",
       "buildsystem": "simple",
       "build-commands": [
