@@ -1,7 +1,7 @@
 # GNOME Extension
 
 ## Purpose
-The extension listens for D-Bus signals from the backend and shows GNOME notifications when new items arrive. This is the minimal implementation for step 3 of the MVP.
+The extension listens for D-Bus signals from the backend and shows GNOME notifications when new items arrive. It also shows backend status, URL, and QR code in the panel popover.
 
 ## Layout
 - `metadata.json` extension metadata and UUID
@@ -27,7 +27,7 @@ gnome-extensions enable send-to-linux@dgkim
 ```
 
 ## Backend Control
-Use the panel menu to start or stop the backend Flatpak (`net.dgkim.SendToLinux.Backend`).
+Use the panel menu to start or stop the backend Flatpak (`net.dgkim.SendToLinux.Backend`). The popover will show "Backend offline" until the service is running.
 
 ## Remove
 ```bash

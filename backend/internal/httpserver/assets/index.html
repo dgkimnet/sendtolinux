@@ -10,7 +10,7 @@
   <main class="page">
     <header class="header">
       <h1>Send to Linux</h1>
-      <p>Paste text below to send it to your desktop.</p>
+      <p>Paste text or upload a file to send it to your desktop.</p>
     </header>
     {{if .Message}}
     <div class="notice">{{.Message}}</div>
@@ -19,6 +19,11 @@
       <label class="label" for="text">Text</label>
       <textarea id="text" name="text" rows="12" placeholder="Paste text"></textarea>
       <button type="submit">Send</button>
+    </form>
+    <form class="card" action="/file" method="post" enctype="multipart/form-data">
+      <label class="label" for="file">File</label>
+      <input id="file" name="file" type="file" required>
+      <button type="submit">Upload</button>
     </form>
   </main>
 </body>

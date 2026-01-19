@@ -15,8 +15,9 @@
 - `go -C backend run .` should:
   - start HTTP server on a port (configurable)
   - register D-Bus name `net.dgkim.SendToLinux`
-  - implement GetStatus / GetRecentItems (in-memory)
-  - emit ItemReceived on `/text` upload
+  - implement GetStatus / GetRecentItems / GetQrPath (in-memory)
+  - emit ItemReceived on `/text` and `/file` uploads
+  - generate QR PNG for the upload URL
 
 Flatpak packaging:
 - Manifest: `backend/flatpak/net.dgkim.SendToLinux.Backend.json`
@@ -50,11 +51,11 @@ Logs:
 - Upload text and file, confirm notification and saved path
 
 ## MVP checklist
-- [ ] backend: D-Bus name registers
-- [ ] backend: GET / serves upload page
-- [ ] backend: POST /text and POST /file work
-- [ ] backend: saves to Downloads/SendToLinux
-- [ ] backend: emits ItemReceived on success
-- [ ] extension: subscribes signals, notifies
-- [ ] extension: copy-to-clipboard action works
-- [ ] extension: shows QR for URL
+- [x] backend: D-Bus name registers
+- [x] backend: GET / serves upload page
+- [x] backend: POST /text and POST /file work
+- [x] backend: saves to Downloads/SendToLinux
+- [x] backend: emits ItemReceived on success
+- [x] extension: subscribes signals, notifies
+- [x] extension: copy-to-clipboard action works
+- [x] extension: shows QR for URL

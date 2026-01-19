@@ -9,8 +9,8 @@ The two communicate via D-Bus on the **session bus**.
 
 ## Data flow
 1) User opens popover from GNOME top bar.
-2) Extension asks backend for current upload URL.
-3) Extension renders QR code (or asks backend for QR PNG) and shows it.
+2) Extension asks backend for current upload URL + QR PNG path.
+3) Extension loads the QR PNG and shows it with the URL.
 4) iOS visits URL and uploads text/file.
 5) Backend saves data to disk and emits `ItemReceived` D-Bus signal.
 6) Extension receives signal:
@@ -45,4 +45,3 @@ Metadata log (optional MVP+):
 - Backend down: extension shows "backend offline" state
 - IP change: extension refreshes URL via D-Bus `GetStatus()`
 - Large uploads: backend enforces size limits
-

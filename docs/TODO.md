@@ -5,11 +5,11 @@
   - [ ] Implement HTTP server with:
     - [x] GET `/` upload UI (text + file)
     - [x] POST `/text`
-    - [ ] POST `/file` (multipart)
+    - [x] POST `/file` (multipart)
   - [x] Save into `~/Downloads/SendToLinux/`
-  - [ ] D-Bus service:
+  - [x] D-Bus service:
     - [x] RequestName `net.dgkim.SendToLinux`
-    - [x] Export methods `GetStatus`, `GetRecentItems`
+    - [x] Export methods `GetStatus`, `GetRecentItems`, `GetQrPath`
     - [x] Emit signal `ItemReceived`
   - [ ] Determine LAN IP for URL
   - [ ] Enforce LAN-only (optional but recommended)
@@ -17,14 +17,14 @@
 - Extension
   - [x] Add top bar icon
   - [ ] Popover UI:
-    - [ ] show QR image (and URL text)
+    - [x] show QR image (and URL text)
     - [ ] recent items list
   - [ ] D-Bus client:
-    - [ ] call `GetStatus`
+    - [x] call `GetStatus`
     - [x] subscribe `ItemReceived`
   - [x] Notification on receive
-  - [ ] Copy-to-clipboard for text
-  - [x] Open folder / open file for file items
+  - [x] Copy-to-clipboard for text
+  - [x] Open folder for received items
 
 ## Post-MVP
 - [ ] systemd --user service installation (optional)

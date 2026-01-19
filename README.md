@@ -17,10 +17,11 @@ Receive text/files from iOS (or any device on same Wi-Fi) via a local web server
   - HTTP server for uploads
   - Saves files to `~/Downloads/SendToLinux/` (default)
   - Emits D-Bus signals when items arrive
-  - Provides status methods (URL/port, recent items)
+  - Provides status methods (URL/port, recent items, QR PNG path)
+  - Generates QR PNG for the upload URL
 - `extension/` GNOME Shell extension (GJS)
   - Top bar icon + popover
-  - Shows QR code for upload URL
+  - Shows backend status, URL, and QR code in the popover
   - Subscribes to D-Bus signals for real-time updates
   - Shows notifications, supports copy-to-clipboard
 
@@ -41,4 +42,3 @@ See:
 - Auth tokens / user accounts
 - Internet exposure (LAN only)
 - Background sync or cloud storage
-

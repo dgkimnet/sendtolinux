@@ -109,3 +109,11 @@
 ## 2026-01-19 (cont.)
 - User requested URL hostnames include `.local`.
 - Updated backend hostname resolution to append `.local` when needed.
+
+## 2026-01-19 (cont. 2)
+- User requested backend file uploads from client.
+- Added POST `/file` multipart handling, file upload form, and updated docs checklists.
+
+## 2026-01-19 (cont. 3)
+- User requested documentation review and updates.
+- Aligned README, DEV, ARCHITECTURE, TODO, and component READMEs with the current QR, upload, and popover status.

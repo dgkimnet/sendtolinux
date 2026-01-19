@@ -60,6 +60,7 @@ func Start(svc *dbussvc.Service) (*http.Server, error) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", h.handleIndex)
 	mux.HandleFunc("/text", h.handleText)
+	mux.HandleFunc("/file", h.handleFile)
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(assetFS))))
 
 	server := &http.Server{
@@ -146,6 +147,71 @@ func (s *Server) handleText(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (s *Server) handleFile(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	maxMB := getenvInt("STL_MAX_UPLOAD_MB", 100)
+	r.Body = http.MaxBytesReader(w, r.Body, int64(maxMB)*1024*1024)
+	if err := r.ParseMultipartForm(int64(maxMB) * 1024 * 1024); err != nil {
+		http.Error(w, "invalid form", http.StatusBadRequest)
+		return
+	}
+
+	file, header, err := r.FormFile("file")
+	if err != nil {
+		http.Error(w, "missing file", http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	filename := filepath.Base(header.Filename)
+	if filename == "" || filename == "." {
+		http.Error(w, "invalid filename", http.StatusBadRequest)
+		return
+	}
+
+	saveDir, err := resolveSaveDir()
+	if err != nil {
+		http.Error(w, "cannot resolve save dir", http.StatusInternalServerError)
+		return
+	}
+	if err := os.MkdirAll(saveDir, 0o755); err != nil {
+		http.Error(w, "cannot create save dir", http.StatusInternalServerError)
+		return
+	}
+
+	targetPath := uniqueFilePath(saveDir, filename)
+	out, err := os.Create(targetPath)
+	if err != nil {
+		http.Error(w, "cannot save file", http.StatusInternalServerError)
+		return
+	}
+	defer out.Close()
+
+	written, err := io.Copy(out, file)
+	if err != nil {
+		http.Error(w, "cannot save file", http.StatusInternalServerError)
+		return
+	}
+
+	item := dbussvc.RecentItem{
+		ID:    strconv.FormatInt(time.Now().UnixNano(), 10),
+		Type:  "file",
+		Value: targetPath,
+		Size:  uint32(written),
+	}
+	s.svc.AddRecent(item)
+	s.svc.EmitItemReceived(item)
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	if err := s.template.Execute(w, pageData{Message: "File sent successfully."}); err != nil {
+		http.Error(w, "template error", http.StatusInternalServerError)
+	}
+}
+
 func resolveSaveDir() (string, error) {
 	if dir := os.Getenv("STL_DIR"); dir != "" {
 		return dir, nil
@@ -167,6 +233,24 @@ func uniqueTextFilename(dir string, now time.Time) string {
 		candidate := filepath.Join(dir, fmt.Sprintf("text-%s-%d.txt", now.Format("20060102-150405"), i))
 		if _, err := os.Stat(candidate); err != nil {
 			return candidate
+		}
+	}
+	return path
+}
+
+func uniqueFilePath(dir, filename string) string {
+	path := filepath.Join(dir, filename)
+	if _, err := os.Stat(path); err != nil {
+		return path
+	}
+
+	ext := filepath.Ext(filename)
+	stem := strings.TrimSuffix(filename, ext)
+	for i := 1; i < 1000; i++ {
+		candidate := fmt.Sprintf("%s-%d%s", stem, i, ext)
+		path = filepath.Join(dir, candidate)
+		if _, err := os.Stat(path); err != nil {
+			return path
 		}
 	}
 	return path
