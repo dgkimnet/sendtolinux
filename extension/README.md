@@ -2,6 +2,7 @@
 
 ## Purpose
 The extension listens for D-Bus signals from the backend and shows GNOME notifications when new items arrive. It also shows backend status, URL, and QR code in the panel popover.
+The panel menu also shows the extension version.
 
 ## Layout
 - `metadata.json` extension metadata and UUID

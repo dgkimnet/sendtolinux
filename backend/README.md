@@ -9,7 +9,9 @@ Steps 1 and 2 are partially implemented:
 - `GetStatus`, `GetRecentItems`, and `GetQrPath` methods (in-memory)
 - Optional `ItemReceived` test signal
 - HTTP server with GET `/` and POST `/text` + `/file` (saved to Downloads)
+- Multi-file `/file` uploads (multipart)
 - QR PNG generation for the upload URL (requires `qrencode`)
+- Upload page shows backend version
 
 ## Run
 ```bash

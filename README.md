@@ -4,7 +4,7 @@
 
 Receive text/files from iOS (or any device on same Wi-Fi) via a local web server, and surface them in GNOME:
 - GNOME top bar extension (tray icon + popover)
-- Local web server for upload (text + files)
+- Local web server for upload (text + multiple files)
 - On receive: GNOME notification
 - Text: one-click copy to clipboard (fallback: open as text file)
 - Icon click: show QR code for upload URL
@@ -21,11 +21,13 @@ Receive text/files from iOS (or any device on same Wi-Fi) via a local web server
   - Emits D-Bus signals when items arrive
   - Provides status methods (URL/port, recent items, QR PNG path)
   - Generates QR PNG for the upload URL
+  - Shows backend version on the upload page
 - `extension/` GNOME Shell extension (GJS)
   - Top bar icon + popover
   - Shows backend status, URL, and QR code in the popover
   - Subscribes to D-Bus signals for real-time updates
   - Shows notifications, supports copy-to-clipboard
+  - Shows extension version in the panel menu
 
 ## Quick start (dev)
 1. Build backend

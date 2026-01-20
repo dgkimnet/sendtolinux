@@ -17,6 +17,7 @@
   - register D-Bus name `net.dgkim.SendToLinux`
   - implement GetStatus / GetRecentItems / GetQrPath (in-memory)
   - emit ItemReceived on `/text` and `/file` uploads
+  - accept multiple files in a single `/file` multipart request
   - generate QR PNG for the upload URL
 
 Flatpak packaging:

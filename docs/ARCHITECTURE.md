@@ -11,7 +11,7 @@ The two communicate via D-Bus on the **session bus**.
 1) User opens popover from GNOME top bar.
 2) Extension asks backend for current upload URL + QR PNG path.
 3) Extension loads the QR PNG and shows it with the URL.
-4) iOS visits URL and uploads text/file.
+4) iOS visits URL and uploads text or one/more files.
 5) Backend saves data to disk and emits `ItemReceived` D-Bus signal.
 6) Extension receives signal:
    - shows GNOME notification
