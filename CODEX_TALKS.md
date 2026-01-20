@@ -117,3 +117,8 @@
 ## 2026-01-19 (cont. 3)
 - User requested documentation review and updates.
 - Aligned README, DEV, ARCHITECTURE, TODO, and component READMEs with the current QR, upload, and popover status.
+
+## 2026-01-20
+- User requested backend support for receiving multiple files and UI updates.
+- Updated `/file` handler to process multiple multipart files and adjusted the upload form to allow multi-select.
+- Added module version strings, created `CHANGELOG.md`, and displayed backend/extension versions in the UI.
