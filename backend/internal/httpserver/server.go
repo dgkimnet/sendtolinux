@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/fs"
 	"log"
+	"mime/multipart"
 	"net"
 	"net/http"
 	"os"
@@ -17,6 +18,7 @@ import (
 	"time"
 
 	"sendtolinux/internal/dbussvc"
+	"sendtolinux/internal/version"
 )
 
 type Server struct {
@@ -24,10 +26,12 @@ type Server struct {
 	template *template.Template
 	assetDir string
 	assetFS  fs.FS
+	version  string
 }
 
 type pageData struct {
 	Message string
+	Version string
 }
 
 func Start(svc *dbussvc.Service) (*http.Server, error) {
@@ -56,7 +60,7 @@ func Start(svc *dbussvc.Service) (*http.Server, error) {
 		return nil, err
 	}
 
-	h := &Server{svc: svc, template: tmpl, assetDir: assetDir, assetFS: assetFS}
+	h := &Server{svc: svc, template: tmpl, assetDir: assetDir, assetFS: assetFS, version: version.Version}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", h.handleIndex)
 	mux.HandleFunc("/text", h.handleText)
@@ -86,7 +90,7 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	if err := s.template.Execute(w, pageData{}); err != nil {
+	if err := s.template.Execute(w, pageData{Version: s.version}); err != nil {
 		http.Error(w, "template error", http.StatusInternalServerError)
 	}
 }
@@ -142,7 +146,7 @@ func (s *Server) handleText(w http.ResponseWriter, r *http.Request) {
 	s.svc.EmitItemReceived(item)
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	if err := s.template.Execute(w, pageData{Message: "Text sent successfully."}); err != nil {
+	if err := s.template.Execute(w, pageData{Message: "Text sent successfully.", Version: s.version}); err != nil {
 		http.Error(w, "template error", http.StatusInternalServerError)
 	}
 }
@@ -160,19 +164,6 @@ func (s *Server) handleFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	file, header, err := r.FormFile("file")
-	if err != nil {
-		http.Error(w, "missing file", http.StatusBadRequest)
-		return
-	}
-	defer file.Close()
-
-	filename := filepath.Base(header.Filename)
-	if filename == "" || filename == "." {
-		http.Error(w, "invalid filename", http.StatusBadRequest)
-		return
-	}
-
 	saveDir, err := resolveSaveDir()
 	if err != nil {
 		http.Error(w, "cannot resolve save dir", http.StatusInternalServerError)
@@ -183,33 +174,84 @@ func (s *Server) handleFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fileHeaders := multipartHeaders(r.MultipartForm)
+	if len(fileHeaders) == 0 {
+		http.Error(w, "missing file", http.StatusBadRequest)
+		return
+	}
+
+	for i, header := range fileHeaders {
+		filename := filepath.Base(header.Filename)
+		if filename == "" || filename == "." {
+			http.Error(w, "invalid filename", http.StatusBadRequest)
+			return
+		}
+
+		item, err := s.saveUploadedFile(saveDir, header, filename, i)
+		if err != nil {
+			http.Error(w, "cannot save file", http.StatusInternalServerError)
+			return
+		}
+		s.svc.AddRecent(item)
+		s.svc.EmitItemReceived(item)
+	}
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	message := "File sent successfully."
+	if len(fileHeaders) > 1 {
+		message = fmt.Sprintf("%d files sent successfully.", len(fileHeaders))
+	}
+	if err := s.template.Execute(w, pageData{Message: message, Version: s.version}); err != nil {
+		http.Error(w, "template error", http.StatusInternalServerError)
+	}
+}
+
+func multipartHeaders(form *multipart.Form) []*multipart.FileHeader {
+	if form == nil {
+		return nil
+	}
+
+	total := 0
+	for _, group := range form.File {
+		total += len(group)
+	}
+	if total == 0 {
+		return nil
+	}
+
+	headers := make([]*multipart.FileHeader, 0, total)
+	for _, group := range form.File {
+		headers = append(headers, group...)
+	}
+	return headers
+}
+
+func (s *Server) saveUploadedFile(saveDir string, header *multipart.FileHeader, filename string, index int) (dbussvc.RecentItem, error) {
+	file, err := header.Open()
+	if err != nil {
+		return dbussvc.RecentItem{}, err
+	}
+	defer file.Close()
+
 	targetPath := uniqueFilePath(saveDir, filename)
 	out, err := os.Create(targetPath)
 	if err != nil {
-		http.Error(w, "cannot save file", http.StatusInternalServerError)
-		return
+		return dbussvc.RecentItem{}, err
 	}
 	defer out.Close()
 
 	written, err := io.Copy(out, file)
 	if err != nil {
-		http.Error(w, "cannot save file", http.StatusInternalServerError)
-		return
+		return dbussvc.RecentItem{}, err
 	}
 
 	item := dbussvc.RecentItem{
-		ID:    strconv.FormatInt(time.Now().UnixNano(), 10),
+		ID:    fmt.Sprintf("%d-%d", time.Now().UnixNano(), index),
 		Type:  "file",
 		Value: targetPath,
 		Size:  uint32(written),
 	}
-	s.svc.AddRecent(item)
-	s.svc.EmitItemReceived(item)
-
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	if err := s.template.Execute(w, pageData{Message: "File sent successfully."}); err != nil {
-		http.Error(w, "template error", http.StatusInternalServerError)
-	}
+	return item, nil
 }
 
 func resolveSaveDir() (string, error) {

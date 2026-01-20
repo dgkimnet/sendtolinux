@@ -84,3 +84,9 @@ button {
 button:hover {
   filter: brightness(0.95);
 }
+
+.footer {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-top: 20px;
+}

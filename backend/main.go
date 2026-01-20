@@ -10,6 +10,7 @@ import (
 
 	"sendtolinux/internal/dbussvc"
 	"sendtolinux/internal/httpserver"
+	"sendtolinux/internal/version"
 
 	"github.com/godbus/dbus/v5"
 )
@@ -40,6 +41,7 @@ func main() {
 	}
 
 	log.Printf("D-Bus service running as %s", dbussvc.ServiceName)
+	log.Printf("SendToLinux backend version %s", version.Version)
 	if os.Getenv("STL_EMIT_TEST") == "1" {
 		if err := svc.EmitTestSignal(); err != nil {
 			log.Printf("emit test signal: %v", err)

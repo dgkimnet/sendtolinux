@@ -22,9 +22,10 @@
     </form>
     <form class="card" action="/file" method="post" enctype="multipart/form-data">
       <label class="label" for="file">File</label>
-      <input id="file" name="file" type="file" required>
+      <input id="file" name="file" type="file" multiple required>
       <button type="submit">Upload</button>
     </form>
+    <footer class="footer">Backend v{{.Version}}</footer>
   </main>
 </body>
 </html>

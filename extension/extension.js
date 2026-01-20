@@ -10,6 +10,7 @@ const SERVICE_NAME = 'net.dgkim.SendToLinux';
 const OBJECT_PATH = '/net/dgkim/SendToLinux';
 const INTERFACE_NAME = 'net.dgkim.SendToLinux';
 const SIGNAL_NAME = 'ItemReceived';
+const EXTENSION_VERSION = '1.0.0';
 
 export default class SendToLinuxExtension {
     constructor() {
@@ -63,6 +64,14 @@ export default class SendToLinuxExtension {
         qrBox.add_child(this._qrImage);
         qrItem.add_child(qrBox);
         this._panelButton.menu.addMenuItem(qrItem);
+
+        this._panelButton.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+
+        const versionItem = new PopupMenu.PopupMenuItem(`Extension v${EXTENSION_VERSION}`, {
+            reactive: false,
+            can_focus: false,
+        });
+        this._panelButton.menu.addMenuItem(versionItem);
 
         this._panelButton.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
