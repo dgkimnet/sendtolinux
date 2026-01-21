@@ -122,3 +122,11 @@
 - User requested backend support for receiving multiple files and UI updates.
 - Updated `/file` handler to process multiple multipart files and adjusted the upload form to allow multi-select.
 - Added module version strings, created `CHANGELOG.md`, and displayed backend/extension versions in the UI.
+
+## 2026-01-21
+- User requested only one notification when multiple files are received.
+- Updated backend to emit a single ItemReceived signal for multi-file uploads.
+- User requested GET /text and /file redirect to the index when reopened in a browser.
+- Added redirects for GET /text and GET /file to /.
+- User requested backend version bump and changelog update.
+- Updated backend version to 1.0.1 and added changelog entry.
