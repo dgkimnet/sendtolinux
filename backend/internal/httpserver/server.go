@@ -96,6 +96,10 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleText(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodGet {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
 	if r.Method != http.MethodPost {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -152,6 +156,10 @@ func (s *Server) handleText(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleFile(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodGet {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
 	if r.Method != http.MethodPost {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -180,6 +188,31 @@ func (s *Server) handleFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if len(fileHeaders) == 1 {
+		header := fileHeaders[0]
+		filename := filepath.Base(header.Filename)
+		if filename == "" || filename == "." {
+			http.Error(w, "invalid filename", http.StatusBadRequest)
+			return
+		}
+
+		item, err := s.saveUploadedFile(saveDir, header, filename, 0)
+		if err != nil {
+			http.Error(w, "cannot save file", http.StatusInternalServerError)
+			return
+		}
+		s.svc.AddRecent(item)
+		s.svc.EmitItemReceived(item)
+
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		if err := s.template.Execute(w, pageData{Message: "File sent successfully.", Version: s.version}); err != nil {
+			http.Error(w, "template error", http.StatusInternalServerError)
+		}
+		return
+	}
+
+	var firstItem dbussvc.RecentItem
+	firstItemSet := false
 	for i, header := range fileHeaders {
 		filename := filepath.Base(header.Filename)
 		if filename == "" || filename == "." {
@@ -193,7 +226,14 @@ func (s *Server) handleFile(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		s.svc.AddRecent(item)
-		s.svc.EmitItemReceived(item)
+		if !firstItemSet {
+			firstItem = item
+			firstItemSet = true
+		}
+	}
+
+	if firstItemSet {
+		s.svc.EmitItemReceived(firstItem)
 	}
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
