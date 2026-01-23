@@ -130,3 +130,16 @@
 - Added redirects for GET /text and GET /file to /.
 - User requested backend version bump and changelog update.
 - Updated backend version to 1.0.1 and added changelog entry.
+
+## 2026-01-23
+- User requested GSettings-based preferences UI for the extension.
+- Added GSettings schema, prefs window, and install-time schema compilation.
+- Updated extension and dev docs for preferences UI and config keys.
+- User requested backend read GSettings directly and update Flatpak manifest.
+- Added backend config loader with GSettings reads (env override fallback) and installed/compiled schema in Flatpak.
+- Updated Flatpak permissions to access host dconf and added Preferences menu item + prefs import fixes.
+- User requested backend use CLI flags instead of GSettings reads.
+- Switched backend config to flags with env defaults and updated extension to pass prefs as Flatpak args.
+- Bumped backend/extension versions to 1.1.0 and updated changelog.
+- User clarified `--dir` should be a folder name under Downloads; updated backend resolution and prefs UI wording.
+- Fixed prefs UI property compatibility and made Open Received Folder respect the configured folder name.
