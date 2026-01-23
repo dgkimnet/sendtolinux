@@ -17,6 +17,7 @@ import (
 	"strings"
 	"time"
 
+	"sendtolinux/internal/config"
 	"sendtolinux/internal/dbussvc"
 	"sendtolinux/internal/version"
 )
@@ -27,6 +28,7 @@ type Server struct {
 	assetDir string
 	assetFS  fs.FS
 	version  string
+	config   config.Config
 }
 
 type pageData struct {
@@ -34,9 +36,9 @@ type pageData struct {
 	Version string
 }
 
-func Start(svc *dbussvc.Service) (*http.Server, error) {
-	bind := getenvDefault("STL_BIND", "0.0.0.0")
-	port := getenvInt("STL_PORT", 8000)
+func Start(svc *dbussvc.Service, cfg config.Config) (*http.Server, error) {
+	bind := cfg.Bind
+	port := cfg.Port
 	addr := net.JoinHostPort(bind, strconv.Itoa(port))
 
 	listener, err := net.Listen("tcp", addr)
@@ -60,7 +62,14 @@ func Start(svc *dbussvc.Service) (*http.Server, error) {
 		return nil, err
 	}
 
-	h := &Server{svc: svc, template: tmpl, assetDir: assetDir, assetFS: assetFS, version: version.Version}
+	h := &Server{
+		svc:      svc,
+		template: tmpl,
+		assetDir: assetDir,
+		assetFS:  assetFS,
+		version:  version.Version,
+		config:   cfg,
+	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", h.handleIndex)
 	mux.HandleFunc("/text", h.handleText)
@@ -105,7 +114,7 @@ func (s *Server) handleText(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	maxMB := getenvInt("STL_MAX_UPLOAD_MB", 100)
+	maxMB := s.config.MaxUploadMB
 	r.Body = http.MaxBytesReader(w, r.Body, int64(maxMB)*1024*1024)
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "invalid form", http.StatusBadRequest)
@@ -124,7 +133,7 @@ func (s *Server) handleText(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	saveDir, err := resolveSaveDir()
+	saveDir, err := resolveSaveDir(s.config)
 	if err != nil {
 		http.Error(w, "cannot resolve save dir", http.StatusInternalServerError)
 		return
@@ -165,14 +174,14 @@ func (s *Server) handleFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	maxMB := getenvInt("STL_MAX_UPLOAD_MB", 100)
+	maxMB := s.config.MaxUploadMB
 	r.Body = http.MaxBytesReader(w, r.Body, int64(maxMB)*1024*1024)
 	if err := r.ParseMultipartForm(int64(maxMB) * 1024 * 1024); err != nil {
 		http.Error(w, "invalid form", http.StatusBadRequest)
 		return
 	}
 
-	saveDir, err := resolveSaveDir()
+	saveDir, err := resolveSaveDir(s.config)
 	if err != nil {
 		http.Error(w, "cannot resolve save dir", http.StatusInternalServerError)
 		return
@@ -294,15 +303,20 @@ func (s *Server) saveUploadedFile(saveDir string, header *multipart.FileHeader, 
 	return item, nil
 }
 
-func resolveSaveDir() (string, error) {
-	if dir := os.Getenv("STL_DIR"); dir != "" {
-		return dir, nil
-	}
+func resolveSaveDir(cfg config.Config) (string, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(home, "Downloads", "SendToLinux"), nil
+	downloadsDir := filepath.Join(home, "Downloads")
+	if cfg.Dir == "" {
+		return filepath.Join(downloadsDir, "SendToLinux"), nil
+	}
+	folder := filepath.Base(strings.TrimSpace(cfg.Dir))
+	if folder == "" || folder == "." || folder == ".." || folder == string(os.PathSeparator) {
+		folder = "SendToLinux"
+	}
+	return filepath.Join(downloadsDir, folder), nil
 }
 
 func uniqueTextFilename(dir string, now time.Time) string {
@@ -336,22 +350,6 @@ func uniqueFilePath(dir, filename string) string {
 		}
 	}
 	return path
-}
-
-func getenvDefault(key, fallback string) string {
-	if val := os.Getenv(key); val != "" {
-		return val
-	}
-	return fallback
-}
-
-func getenvInt(key string, fallback int) int {
-	if val := os.Getenv(key); val != "" {
-		if parsed, err := strconv.Atoi(val); err == nil {
-			return parsed
-		}
-	}
-	return fallback
 }
 
 func hostnameOrLocal() string {

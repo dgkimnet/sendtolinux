@@ -26,11 +26,16 @@ Flatpak packaging:
 - Requires: `org.freedesktop.Sdk.Extension.golang` for Go toolchain inside Flatpak SDK
 - Vendored deps for offline builds: run `go -C backend mod vendor` before building
 
-Recommended env vars:
+Recommended env vars (optional defaults for CLI flags):
 - `STL_BIND=0.0.0.0`
 - `STL_PORT=8000` (or 0 for random)
 - `STL_DIR=/home/<user>/Downloads/SendToLinux`
 - `STL_MAX_UPLOAD_MB=100`
+Backend CLI flags (override env defaults):
+- `--bind 0.0.0.0`
+- `--port 8000` (or 0 for random)
+- `--dir SendToLinux` (folder name under Downloads)
+- `--max-upload-mb 100`
 
 ## Extension dev
 Install symlink (dev):
@@ -41,6 +46,9 @@ Install symlink (dev):
    - Wayland: log out/in (or `gnome-shell --replace` in nested session)
 3) Enable:
    - `gnome-extensions enable send-to-linux@dgkim`
+
+Open preferences UI:
+- `gnome-extensions prefs send-to-linux@dgkim`
 
 Logs:
 - `journalctl --user -f | grep -i gnome-shell`

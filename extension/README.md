@@ -7,8 +7,10 @@ The panel menu also shows the extension version.
 ## Layout
 - `metadata.json` extension metadata and UUID
 - `extension.js` D-Bus signal subscription and notifications
+- `prefs.js` preferences window UI
 - `install.sh` helper to install the extension into the user profile
 - `uninstall.sh` helper to remove the extension from the user profile
+- `schemas/` GSettings schema (compiled on install)
 
 ## Build
 No build step is required for this simple JavaScript extension.
@@ -25,6 +27,11 @@ Restart GNOME Shell and enable the extension:
 Then run:
 ```bash
 gnome-extensions enable send-to-linux@dgkim
+```
+
+Preferences UI:
+```bash
+gnome-extensions prefs send-to-linux@dgkim
 ```
 
 ## Backend Control

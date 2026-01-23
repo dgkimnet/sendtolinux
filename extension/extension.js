@@ -10,7 +10,7 @@ const SERVICE_NAME = 'net.dgkim.SendToLinux';
 const OBJECT_PATH = '/net/dgkim/SendToLinux';
 const INTERFACE_NAME = 'net.dgkim.SendToLinux';
 const SIGNAL_NAME = 'ItemReceived';
-const EXTENSION_VERSION = '1.0.0';
+const EXTENSION_VERSION = '1.1.0';
 
 export default class SendToLinuxExtension {
     constructor() {
@@ -78,6 +78,10 @@ export default class SendToLinuxExtension {
         const openItem = new PopupMenu.PopupMenuItem('Open Received Folder');
         openItem.connect('activate', () => this._openReceivedFolder());
         this._panelButton.menu.addMenuItem(openItem);
+
+        const prefsItem = new PopupMenu.PopupMenuItem('Preferences');
+        prefsItem.connect('activate', () => this._openPreferences());
+        this._panelButton.menu.addMenuItem(prefsItem);
 
         this._panelButton.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
@@ -232,13 +236,51 @@ export default class SendToLinuxExtension {
     _openReceivedFolder() {
         const downloads = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOWNLOAD) ||
             GLib.get_home_dir();
-        const folder = GLib.build_filenamev([downloads, 'SendToLinux']);
+        let folderName = 'SendToLinux';
+        try {
+            const settings = new Gio.Settings({
+                schema_id: 'org.gnome.shell.extensions.send-to-linux',
+            });
+            const dir = settings.get_string('dir');
+            if (dir) {
+                folderName = GLib.path_get_basename(dir);
+            }
+        } catch (err) {
+            // Fall back to default folder name.
+        }
+        const folder = GLib.build_filenamev([downloads, folderName]);
         const file = Gio.File.new_for_path(folder);
         Gio.AppInfo.launch_default_for_uri(file.get_uri(), null);
     }
 
+    _openPreferences() {
+        Main.extensionManager.openExtensionPrefs('send-to-linux@dgkim', '', {});
+    }
+
     _startBackend() {
-        this._runFlatpak(['flatpak', 'run', 'net.dgkim.SendToLinux.Backend']);
+        const argv = ['flatpak', 'run', 'net.dgkim.SendToLinux.Backend'];
+        const settings = new Gio.Settings({
+            schema_id: 'org.gnome.shell.extensions.send-to-linux',
+        });
+        const bind = settings.get_string('bind');
+        const port = settings.get_int('port');
+        const dir = settings.get_string('dir');
+        const maxUploadMb = settings.get_int('max-upload-mb');
+
+        if (bind) {
+            argv.push('--bind', bind);
+        }
+        if (Number.isInteger(port)) {
+            argv.push('--port', String(port));
+        }
+        if (dir) {
+            argv.push('--dir', dir);
+        }
+        if (Number.isInteger(maxUploadMb)) {
+            argv.push('--max-upload-mb', String(maxUploadMb));
+        }
+
+        this._runFlatpak(argv);
     }
 
     _stopBackend() {

@@ -8,6 +8,7 @@ import (
 	"syscall"
 	"time"
 
+	"sendtolinux/internal/config"
 	"sendtolinux/internal/dbussvc"
 	"sendtolinux/internal/httpserver"
 	"sendtolinux/internal/version"
@@ -35,7 +36,8 @@ func main() {
 		log.Fatalf("export service: %v", err)
 	}
 
-	srv, err := httpserver.Start(svc)
+	cfg := config.ParseFlags()
+	srv, err := httpserver.Start(svc, cfg)
 	if err != nil {
 		log.Fatalf("start http server: %v", err)
 	}

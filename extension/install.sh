@@ -10,4 +10,10 @@ rsync -a --delete \
   --exclude "README.md" \
   "${SCRIPT_DIR}/" "${EXT_DIR}/"
 
+if command -v glib-compile-schemas >/dev/null 2>&1; then
+  glib-compile-schemas "${EXT_DIR}/schemas"
+else
+  echo "Warning: glib-compile-schemas not found; prefs may not load until schemas are compiled."
+fi
+
 echo "Installed extension to ${EXT_DIR}"

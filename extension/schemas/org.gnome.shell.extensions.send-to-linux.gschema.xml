@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.send-to-linux" path="/org/gnome/shell/extensions/send-to-linux/">
+    <key name="bind" type="s">
+      <default>'0.0.0.0'</default>
+      <summary>Bind address</summary>
+      <description>IP address to bind the backend HTTP server.</description>
+    </key>
+    <key name="port" type="i">
+      <default>8000</default>
+      <summary>Port</summary>
+      <description>TCP port for the backend HTTP server. Use 0 for a random port.</description>
+    </key>
+    <key name="dir" type="s">
+      <default>''</default>
+      <summary>Save directory</summary>
+      <description>Directory where received files are stored. Leave empty to use the default.</description>
+    </key>
+    <key name="max-upload-mb" type="i">
+      <default>100</default>
+      <summary>Max upload size (MB)</summary>
+      <description>Maximum upload size in megabytes.</description>
+    </key>
+  </schema>
+</schemalist>
