@@ -1,6 +1,7 @@
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import St from 'gi://St';
+import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as MessageTray from 'resource:///org/gnome/shell/ui/messageTray.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
@@ -12,8 +13,9 @@ const INTERFACE_NAME = 'net.dgkim.SendToLinux';
 const SIGNAL_NAME = 'ItemReceived';
 const EXTENSION_VERSION = '1.1.1';
 
-export default class SendToLinuxExtension {
-    constructor() {
+export default class SendToLinuxExtension extends Extension {
+    constructor(metadata) {
+        super(metadata);
         this._signalId = null;
         this._panelButton = null;
         this._notificationSource = null;
@@ -239,9 +241,10 @@ export default class SendToLinuxExtension {
             GLib.get_home_dir();
         let folderName = 'SendToLinux';
         try {
-            const settings = new Gio.Settings({
-                schema_id: 'org.gnome.shell.extensions.send-to-linux',
-            });
+            // const settings = new Gio.Settings({
+            //     schema_id: 'org.gnome.shell.extensions.send-to-linux',
+            // });
+            const settings = this.getSettings();
             const dir = settings.get_string('dir');
             if (dir) {
                 folderName = GLib.path_get_basename(dir);
@@ -260,9 +263,10 @@ export default class SendToLinuxExtension {
 
     _startBackend() {
         const argv = ['flatpak', 'run', 'net.dgkim.SendToLinux.Backend'];
-        const settings = new Gio.Settings({
-            schema_id: 'org.gnome.shell.extensions.send-to-linux',
-        });
+        // const settings = new Gio.Settings({
+        //     schema_id: 'org.gnome.shell.extensions.send-to-linux',
+        // });
+        const settings = this.getSettings();
         const bind = settings.get_string('bind');
         const port = settings.get_int('port');
         const dir = settings.get_string('dir');
