@@ -1,5 +1,11 @@
 # Changelog
 
+## Backend 1.1.1 - 2026-01-25
+- D-Bus item size uses uint64 to support large uploads (e.g., 32GB).
+
+## Extension 1.1.1 - 2026-01-25
+- Increase max upload size preference cap to 32GB.
+
 ## Backend 1.1.0 - 2026-01-23
 - Replace GSettings reads with CLI flags (env defaults still supported).
 - Backend now accepts --bind/--port/--dir/--max-upload-mb on startup.

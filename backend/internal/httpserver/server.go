@@ -153,7 +153,7 @@ func (s *Server) handleText(w http.ResponseWriter, r *http.Request) {
 		ID:    strconv.FormatInt(time.Now().UnixNano(), 10),
 		Type:  "text",
 		Value: text,
-		Size:  uint32(len([]byte(text))),
+		Size:  uint64(len([]byte(text))),
 	}
 	s.svc.AddRecent(item)
 	s.svc.EmitItemReceived(item)
@@ -298,7 +298,7 @@ func (s *Server) saveUploadedFile(saveDir string, header *multipart.FileHeader, 
 		ID:    fmt.Sprintf("%d-%d", time.Now().UnixNano(), index),
 		Type:  "file",
 		Value: targetPath,
-		Size:  uint32(written),
+		Size:  uint64(written),
 	}
 	return item, nil
 }

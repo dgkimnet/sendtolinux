@@ -143,3 +143,9 @@
 - Bumped backend/extension versions to 1.1.0 and updated changelog.
 - User clarified `--dir` should be a folder name under Downloads; updated backend resolution and prefs UI wording.
 - Fixed prefs UI property compatibility and made Open Received Folder respect the configured folder name.
+
+## 2026-01-25
+- User requested 32GB upload support across backend and extension.
+- Updated D-Bus item size to uint64 and adjusted docs/handlers to support large uploads.
+- Raised extension max upload preference cap to 32768 MB.
+- Bumped backend and extension versions to 1.1.1 and updated changelog.

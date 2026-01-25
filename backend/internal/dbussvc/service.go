@@ -17,7 +17,7 @@ type RecentItem struct {
 	ID    string
 	Type  string
 	Value string
-	Size  uint32
+	Size  uint64
 }
 
 type statusState struct {
@@ -69,7 +69,7 @@ func (s *Service) GetRecentItems(limit uint32) ([]RecentItem, *dbus.Error) {
 
 func (s *Service) EmitTestSignal() error {
 	value := "test"
-	return s.conn.Emit(dbus.ObjectPath(ObjectPath), InterfaceName+".ItemReceived", "test-0", "text", value, uint32(len(value)))
+	return s.conn.Emit(dbus.ObjectPath(ObjectPath), InterfaceName+".ItemReceived", "test-0", "text", value, uint64(len(value)))
 }
 
 func (s *Service) EmitItemReceived(item RecentItem) {

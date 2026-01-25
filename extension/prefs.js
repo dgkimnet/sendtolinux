@@ -61,7 +61,7 @@ export default class SendToLinuxPreferences extends ExtensionPreferences {
 
         const sizeAdjustment = new Gtk.Adjustment({
             lower: 1,
-            upper: 2048,
+            upper: 32768,
             step_increment: 1,
             page_increment: 10,
             value: settings.get_int('max-upload-mb'),

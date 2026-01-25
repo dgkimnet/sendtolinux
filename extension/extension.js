@@ -10,7 +10,7 @@ const SERVICE_NAME = 'net.dgkim.SendToLinux';
 const OBJECT_PATH = '/net/dgkim/SendToLinux';
 const INTERFACE_NAME = 'net.dgkim.SendToLinux';
 const SIGNAL_NAME = 'ItemReceived';
-const EXTENSION_VERSION = '1.1.0';
+const EXTENSION_VERSION = '1.1.1';
 
 export default class SendToLinuxExtension {
     constructor() {
@@ -125,10 +125,11 @@ export default class SendToLinuxExtension {
 
     _onItemReceived(_connection, _sender, _path, _iface, _signal, params) {
         const [id, type, value, size] = params.deepUnpack();
+        const sizeBytes = typeof size === 'bigint' ? Number(size) : size;
         const title = type === 'text' ? 'Text received' : 'File received';
         const body = type === 'text'
             ? value
-            : `${value} (${size} bytes)`;
+            : `${value} (${sizeBytes} bytes)`;
 
         this._ensureNotificationSource();
         const notification = new MessageTray.Notification({
