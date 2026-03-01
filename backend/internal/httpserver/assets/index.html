@@ -24,8 +24,124 @@
       <label class="label" for="file">File</label>
       <input id="file" name="file" type="file" multiple required>
       <button type="submit">Upload</button>
+      <div id="upload-progress" class="upload-progress" hidden>
+        <div class="progress-head">
+          <span id="progress-label">Uploading...</span>
+          <span id="progress-value">0%</span>
+        </div>
+        <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Upload progress">
+          <div id="progress-bar" class="progress-bar"></div>
+        </div>
+        <div id="progress-detail" class="progress-detail">0 B / 0 B</div>
+      </div>
     </form>
     <footer class="footer">Backend v{{.Version}}</footer>
   </main>
+  <script>
+    (() => {
+      const form = document.querySelector('form[action="/file"]');
+      if (!form || typeof XMLHttpRequest === 'undefined') {
+        return;
+      }
+
+      const fileInput = form.querySelector('#file');
+      const submitButton = form.querySelector('button[type="submit"]');
+      const progressWrap = document.getElementById('upload-progress');
+      const progressLabel = document.getElementById('progress-label');
+      const progressValue = document.getElementById('progress-value');
+      const progressBar = document.getElementById('progress-bar');
+      const progressDetail = document.getElementById('progress-detail');
+
+      const formatBytes = (value) => {
+        if (!Number.isFinite(value) || value <= 0) {
+          return '0 B';
+        }
+        const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        let size = value;
+        let unit = 0;
+        while (size >= 1024 && unit < units.length - 1) {
+          size /= 1024;
+          unit++;
+        }
+        const digits = size >= 10 || unit === 0 ? 0 : 1;
+        return `${size.toFixed(digits)} ${units[unit]}`;
+      };
+
+      const setProgress = (percent, loaded, total) => {
+        const clamped = Math.max(0, Math.min(100, percent));
+        const percentText = `${Math.round(clamped)}%`;
+        progressValue.textContent = percentText;
+        progressBar.style.width = `${clamped}%`;
+        progressBar.parentElement.setAttribute('aria-valuenow', String(Math.round(clamped)));
+        if (Number.isFinite(total) && total > 0) {
+          progressDetail.textContent = `${formatBytes(loaded)} / ${formatBytes(total)}`;
+        } else {
+          progressDetail.textContent = formatBytes(loaded);
+        }
+      };
+
+      form.addEventListener('submit', (event) => {
+        if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+          return;
+        }
+        event.preventDefault();
+        const expectedTotal = Array.from(fileInput.files).reduce((sum, file) => sum + (file.size || 0), 0);
+        const formData = new FormData(form);
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', form.action, true);
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+
+        if (progressWrap) {
+          progressWrap.hidden = false;
+        }
+        progressLabel.textContent = 'Uploading...';
+        setProgress(0, 0, 0);
+        submitButton.disabled = true;
+        fileInput.disabled = true;
+
+        xhr.upload.onprogress = (evt) => {
+          if (!evt) {
+            return;
+          }
+          if (evt.lengthComputable) {
+            setProgress((evt.loaded / evt.total) * 100, evt.loaded, evt.total);
+          } else {
+            setProgress(0, evt.loaded, 0);
+          }
+        };
+
+        xhr.onload = () => {
+          submitButton.disabled = false;
+          fileInput.disabled = false;
+          if (xhr.status >= 200 && xhr.status < 300) {
+            setProgress(100, expectedTotal, expectedTotal);
+            progressLabel.textContent = 'Upload complete';
+            progressDetail.textContent = 'Your file was sent successfully.';
+            form.reset();
+            return;
+          }
+          progressLabel.textContent = 'Upload failed';
+          progressDetail.textContent = `Server returned ${xhr.status}.`;
+        };
+
+        xhr.onerror = () => {
+          submitButton.disabled = false;
+          fileInput.disabled = false;
+          progressLabel.textContent = 'Upload failed';
+          progressDetail.textContent = 'Network error during upload.';
+        };
+
+        xhr.onabort = () => {
+          submitButton.disabled = false;
+          fileInput.disabled = false;
+          progressLabel.textContent = 'Upload canceled';
+          progressDetail.textContent = 'Upload was canceled.';
+        };
+
+        xhr.send(formData);
+      });
+    })();
+  </script>
 </body>
 </html>

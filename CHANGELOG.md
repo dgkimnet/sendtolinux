@@ -1,5 +1,10 @@
 # Changelog
 
+## Backend 1.2.0 - 2026-03-01
+- Add web upload progress UI (percent + transferred size) for file uploads.
+- Use XHR multipart submission in the web page while preserving non-JS form fallback.
+- Fix missing file upload regression by building FormData before disabling file input.
+
 ## Backend 1.1.1 - 2026-01-25
 - D-Bus item size uses uint64 to support large uploads (e.g., 32GB).
 
