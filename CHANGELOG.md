@@ -1,5 +1,8 @@
 # Changelog
 
+## Extension 4 - 2026-10-01
+- Add GNOME Shell 50 compatibility for Ubuntu 26.04 while retaining GNOME Shell 46 support for Ubuntu 24.04.
+
 ## Backend 1.2.0 - 2026-03-01
 - Add web upload progress UI (percent + transferred size) for file uploads.
 - Use XHR multipart submission in the web page while preserving non-JS form fallback.

@@ -4,8 +4,9 @@
   "description": "Receive text/files over LAN and surface them in GNOME.",
   "shell-version": [
     "45",
-    "46"
+    "46",
+    "50"
   ],
   "settings-schema": "org.gnome.shell.extensions.send-to-linux",
-  "version": 3
+  "version": 4
 }

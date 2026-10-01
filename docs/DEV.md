@@ -1,7 +1,8 @@
 # Development Guide
 
 ## Prereqs
-- GNOME Shell (GNOME 45+ recommended)
+- Ubuntu 24.04 (GNOME Shell 46) or Ubuntu 26.04 (GNOME Shell 50)
+- GNOME Shell 45, 46, or 50 for other supported environments
 - Go 1.22+
 - `gnome-extensions` CLI (optional but helpful)
 - `qrencode` (backend QR PNG generation)
@@ -38,6 +39,10 @@ Backend CLI flags (override env defaults):
 - `--max-upload-mb 100`
 
 ## Extension dev
+The extension metadata declares support for GNOME Shell 46 and 50, which are
+the GNOME versions shipped by Ubuntu 24.04 and 26.04 respectively. GNOME 50
+does not require a separate JavaScript port for this extension.
+
 Install symlink (dev):
 1) Copy or symlink `extension/` to:
    - `~/.local/share/gnome-shell/extensions/send-to-linux@dgkim/`
